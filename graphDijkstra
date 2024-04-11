@@ -1,0 +1,188 @@
+from collections import defaultdict
+import heapq
+
+class Grafo:
+  def __init__(self):
+    self.adjacencias = defaultdict(list)
+    self.ordem = 0  # vértices
+    self.tamanho = 0  # arestas
+
+  def adiciona_vertice(self, u):
+    if u not in self.adjacencias:
+      self.adjacencias[u]
+      self.ordem += 1
+      print(f"Vértice '{u}' adicionado ao grafo.")
+    else:
+      print(f"Vértice '{u}' já existe no grafo.")
+
+  def adiciona_aresta(self, u, v, peso):
+    if(not self.tem_vertice(v)):
+      self.adiciona_vertice(v)
+    if(not self.tem_vertice(u)):
+      self.adiciona_vertice(u)
+    self.adjacencias[u].append((v, peso))
+    self.tamanho += 1
+    print(f"Aresta adicionada de '{u}' para '{v}' com peso {peso}.")
+
+  def remove_aresta(self, u, v):
+    if u in self.adjacencias:
+      nova_lista = []
+      for destino, peso in self.adjacencias[u]:
+        if destino != v:
+          nova_lista.append((destino, peso))
+      if len(nova_lista) == len(self.adjacencias[u]):
+        print(f"Nenhuma aresta de '{u}' para '{v}' foi encontrada.")
+      else:
+        self.tamanho -= 1
+        print(f"Aresta de '{u}' para '{v}' removida.")
+      self.adjacencias[u] = nova_lista
+    else:
+      print(f"Vértice '{u}' não existe no grafo.")
+
+  def remove_vertice(self, u):
+    if u in self.adjacencias:
+      self.tamanho -= len(self.adjacencias[u])
+      del self.adjacencias[u]
+      self.ordem -= 1
+      print(f"Vértice '{u}' e todas as arestas saindo dele foram removidos.")
+    for vertice in list(self.adjacencias.keys()):
+      nova_lista = []
+      for destino, peso in self.adjacencias[vertice]:
+        if destino != u:
+          nova_lista.append((destino, peso))
+      if len(nova_lista) != len(self.adjacencias[vertice]):
+        self.tamanho -= (len(self.adjacencias[vertice]) - len(nova_lista))
+      self.adjacencias[vertice] = nova_lista
+    print(f"Todas as arestas entrando em '{u}' foram removidas")
+
+  def tem_aresta(self, u, v):
+    if u in self.adjacencias:
+      for destino, _ in self.adjacencias[u]:
+        if destino == v:
+          print(f"Existe uma aresta de '{u}' para '{v}'.")
+          return True
+    print(f"Não existe aresta de '{u}' para '{v}'.")
+    return False
+
+  def tem_vertice(self, u):
+    return u in self.adjacencias
+
+  def grau_entrada(self, u):
+    contador = 0
+    for vertice in self.adjacencias:
+      for destino, _ in self.adjacencias[vertice]:
+        if destino == u:
+          contador += 1
+    print(f"O grau de entrada do vértice '{u}' é {contador}.")
+    return contador
+
+  def grau_saida(self, u):
+    if u in self.adjacencias:
+      grau = len(self.adjacencias[u])
+      print(f"Grau de saída do vértice '{u}': {grau}")
+      return grau
+    else:
+      print(f"Vértice '{u}' não existe no grafo.")
+      return 0
+
+  def grau(self, u):
+    if u not in self.adjacencias:
+      print(f"Vértice '{u}' não existe no grafo.")
+      return 0
+    grau_entrada = self.grau_entrada(u)
+    grau_saida = self.grau_saida(u)
+    total_grau = grau_entrada + grau_saida
+    print(f"Grau total do vértice '{u}': {total_grau}")
+    return total_grau
+
+  def get_peso(self, u, v):
+    if self.tem_aresta(u, v):
+      for destino, peso in self.adjacencias[u]:
+        if destino == v:
+          print(f"Peso da aresta de '{u}' para '{v}': {peso}")
+          return peso
+
+  def imprime_lista_adjacencias(self):
+    print("Lista de adjacências do grafo:")
+    for vertice, arestas in self.adjacencias.items():
+      arestas_str = " -> ".join(f"('{destino}', {peso})" for destino, peso in arestas) + " ->" if arestas else ""
+      print(f"{vertice}: {arestas_str}")
+
+  def Dijkstra(self, source_node, destination_node):
+    distances = {}
+    for vertex in self.adjacencias:
+      distances[vertex] = float('infinity')  # distâncias dos vértices como infinito
+
+    previous_nodes = {}
+    for vertex in self.adjacencias:
+      previous_nodes[vertex] = None  # previous nodes como None
+
+    distances[source_node] = 0 # distância do vértice de origem para ele mesmo como 0
+    pq = [(0, source_node)] # cria fila de prioridade (priority queue = pq) e insere o vértice de origem com distância 0
+
+    while pq: # while tem coisa na fila de pq
+      current_distance, current_vertex = heapq.heappop(pq) # pega o vértice com a menor distância
+      if current_vertex == destination_node:
+        break # se vértice atual for destino encerra
+
+      for neighbor, weight in self.adjacencias[current_vertex]: # para cada vizinho do vértice atual
+        distance = current_distance + weight # soma distancia e peso para a nova distância até o vizinho
+        if distance < distances[neighbor]: # se a nova distância for menor que a distância registrada
+          distances[neighbor] = distance # atualiza a distância do vizinho para a atual
+          previous_nodes[neighbor] = current_vertex # atualiza o previous do vizinho para o atual
+          heapq.heappush(pq, (distance, neighbor)) # insere o vizinho na fila de prioridade com nova distância
+
+    shortest_path = []
+    current_vertex = destination_node
+    while current_vertex is not None:
+      shortest_path.insert(0, current_vertex)
+      current_vertex = previous_nodes[current_vertex] # reconstrói o menor caminho desde destino até origem
+
+    if shortest_path and shortest_path[0] == source_node:  # verifica se caminho válido foi encontrado
+      shortest_path_cost = distances[destination_node] # o custo é a distância armazenada para o vértice de destino
+    else:
+      shortest_path_cost = float('infinity') # se não foi encontrado um caminho válido, custo = infinito
+    return (shortest_path, shortest_path_cost) # Retorna o menor caminho e o custo
+
+"""G = Grafo()
+
+G.adiciona_vertice("Pedro")
+G.adiciona_vertice("Maria")
+G.adiciona_vertice("Antonio")
+G.adiciona_vertice("Clara")
+
+G.adiciona_aresta("Pedro", "Maria", 3)
+G.adiciona_aresta("Pedro", "Antonio", 1)
+G.adiciona_aresta("Maria", "Clara", 2)
+G.adiciona_aresta("Clara", "Maria", 5)
+
+G.remove_aresta("Pedro", "Maria")
+G.remove_vertice("Pedro")
+G.tem_aresta("Maria", "Clara")
+G.grau_entrada("Maria")
+G.grau_saida("Maria")
+G.grau("Maria")
+G.get_peso("Maria","Clara")
+G.imprime_lista_adjacencias()"""
+
+G = Grafo()
+
+G.adiciona_vertice("A")
+G.adiciona_vertice("B")
+G.adiciona_vertice("C")
+G.adiciona_vertice("D")
+G.adiciona_vertice("E")
+
+G.adiciona_aresta("A", "B", 2)
+G.adiciona_aresta("A", "C", 4)
+G.adiciona_aresta("B", "C", 1)
+G.adiciona_aresta("B", "D", 7)
+G.adiciona_aresta("C", "D", 3)
+G.adiciona_aresta("C", "E", 3)
+G.adiciona_aresta("D", "E", 1)
+G.adiciona_aresta("E", "A", 8)
+G.adiciona_aresta("B", "E", 5)
+G.adiciona_aresta("D", "A", 2)
+
+caminho, custo = G.Dijkstra("A", "E")
+print(f"O menor caminho de A para E: {caminho} com custo {custo}")
