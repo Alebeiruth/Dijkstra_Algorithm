@@ -2,10 +2,12 @@ from collections import defaultdict
 import heapq
 
 class Grafo:
-    def __init__(self):
+    def __init__(self, direcionado=False, ponderado=False ):
         self.adjacente_list = defaultdict(list)
         self.tamanho = 0 
         self.ordem = 0
+        self.direcionado = direcionado
+        self.ponderado = ponderado
 
     def adiciona_vertice(self, u):
         if u not in self.adjacente_list:
@@ -15,14 +17,30 @@ class Grafo:
         else:
             print(f"Vértice '{u}' já existe no grafo.")
 
-    def adiciona_aresta(self, u, v, peso):
-        if(not self.tem_vertice(u)):
-                self.adiciona_vertice(u)
-        if(not self.tem_vertice(v)):
-                self.adiciona_vertice(v)
+    def adiciona_aresta(self, u, v, peso=1):
+        if not self.ponderado:
+            peso = 1  # Se o grafo não é ponderado, usar peso padrão 1
+        if not self.tem_vertice(u):
+            self.adiciona_vertice(u)
+        if not self.tem_vertice(v):
+            self.adiciona_vertice(v)
         self.adjacente_list[u].append((v, peso))
+        if not self.direcionado:
+            self.adjacente_list[v].append((u, peso))  # Adiciona a aresta reversa para grafos não direcionados
         self.tamanho += 1
-        print(f"Aresta adicionada de '{u}' para '{v}' com peso {peso}.")     
+        print(f"Aresta adicionada de '{u}' para '{v}' com peso {peso}.")    
+
+    def get_max_arestas(self):
+        if self.direcionado:
+            return self.ordem * (self.ordem - 1)
+        else:
+            return self.ordem * (self.ordem - 1) // 2
+
+    def retorna_adjacentes(self, u):
+        if u in self.adjacente_list:
+            return [v for v, _ in self.adjacente_list[u]]
+        else:
+            return []
 
     def remove_aresta(self, u, v):
         if u in self.adjacente_list:
@@ -202,3 +220,28 @@ grafo.adiciona_aresta("D", "A", 2)
 # Chamada para encontrar o menor caminho de 'A' para 'E'
 caminho, custo = grafo.Dijkstra("A", "E")
 print(f"O menor caminho de A para E é {caminho} com custo {custo}")
+
+print("\n")
+
+# Criando uma instância de um grafo direcionado e ponderado
+grafo_direcionado = Grafo(direcionado=True, ponderado=True)
+grafo_direcionado.adiciona_vertice("A")
+grafo_direcionado.adiciona_vertice("B")
+grafo_direcionado.adiciona_vertice("C")
+grafo_direcionado.adiciona_aresta("A", "B", 5)
+grafo_direcionado.adiciona_aresta("B", "C", 3)
+
+# Criando uma instância de um grafo não direcionado e não ponderado
+grafo_nao_direcionado = Grafo(direcionado=False, ponderado=False)
+grafo_nao_direcionado.adiciona_vertice("A")
+grafo_nao_direcionado.adiciona_vertice("B")
+grafo_nao_direcionado.adiciona_vertice("C")
+grafo_nao_direcionado.adiciona_aresta("A", "B")
+grafo_nao_direcionado.adiciona_aresta("B", "C")
+
+# Utilização das funções
+print("Max arestas em grafo direcionado: ", grafo_direcionado.get_max_arestas())
+print("Adjacências de 'B' em grafo direcionado: ", grafo_direcionado.retorna_adjacentes("B"))
+
+print("Max arestas em grafo não direcionado: ", grafo_nao_direcionado.get_max_arestas())
+print("Adjacências de 'B' em grafo não direcionado: ", grafo_nao_direcionado.retorna_adjacentes("B"))
