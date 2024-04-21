@@ -1,3 +1,16 @@
+
+
+## u = vertice inicial/origem
+
+## v = vertice final/destino
+
+## tamanho = numero de arestas
+
+## ordem = numero de vertices
+
+## peso =  valor das arestas
+
+## Ponto 0: Construtor do Grafo de lista de adjacencias
 from collections import defaultdict
 import heapq
 
@@ -8,7 +21,8 @@ class Grafo:
         self.ordem = 0
         self.direcionado = direcionado
         self.ponderado = ponderado
-
+        
+    ## Ponto A: Função adciona vertice, faz o teste da existencia do mesmo e cria a vertice
     def adiciona_vertice(self, u):
         if u not in self.adjacente_list:
             self.adjacente_list[u]
@@ -16,7 +30,8 @@ class Grafo:
             print(f"Vértice '{u}' adicionado ao grafo.")
         else:
             print(f"Vértice '{u}' já existe no grafo.")
-
+            
+    ## Ponto B: Função que adciona arestas
     def adiciona_aresta(self, u, v, peso=1):
         if not self.ponderado:
             peso = 1  # Se o grafo não é ponderado, usar peso padrão 1
@@ -30,18 +45,21 @@ class Grafo:
         self.tamanho += 1
         print(f"Aresta adicionada de '{u}' para '{v}' com peso {peso}.")    
 
+    #Nova Função que retorna a quantidade máxima de arestas que o grafo pode possuir
     def get_max_arestas(self):
         if self.direcionado:
             return self.ordem * (self.ordem - 1)
         else:
             return self.ordem * (self.ordem - 1) // 2
-
+            
+    #Nova Função que retorna uma lista com os vértices adjacentes ao vértice u
     def retorna_adjacentes(self, u):
         if u in self.adjacente_list:
             return [v for v, _ in self.adjacente_list[u]]
         else:
             return []
-
+            
+    ##Ponto C: Função para remoção de arestas do vertice u para vertice v
     def remove_aresta(self, u, v):
         if u in self.adjacente_list:
             nova_lista = []
@@ -57,6 +75,7 @@ class Grafo:
         else:
             print(f"Vértice '{u}' não existe no grafo.")
 
+    #Ponto D: Função que retira todos os vertices
     def remove_vertice(self, u):
         if u in self.adjacente_list:
             self.tamanho -= len(self.adjacente_list[u])
@@ -73,6 +92,7 @@ class Grafo:
             self.adjacente_list[vertice] = nova_lista
         print(f"Todas as arestas entrando em '{u}' foram removidas")
 
+    #Ponto E: Função de verificação de arestas entres os vertices u e v
     def tem_aresta(self, u, v):
         if u in self.adjacente_list:
             for destino, _ in self.adjacente_list[u]:
@@ -81,10 +101,12 @@ class Grafo:
                     return True
             print(f"Não existe aresta de '{u}' para '{v}'.")
             return False
-        
+
+    # Função que verifica na lista de adjacencias a existencia do vertice
     def tem_vertice(self, u):
         return u in self.adjacente_list
-    
+
+    #Ponto F: Função que contabiliza aresta que entram naquele vertice
     def grau_entrada(self, u):
         contador = 0
         for vertice in self.adjacente_list:
@@ -93,7 +115,8 @@ class Grafo:
                     contador += 1
         print(f"O grau de entrada do vértice '{u}' é {contador}.")
         return contador
-    
+
+    #Ponto G: Função que contabiliza aresta que saem naquele vertice
     def grau_saida(self, u):
         if u in self.adjacente_list:
             grau = len(self.adjacente_list[u])
@@ -102,7 +125,7 @@ class Grafo:
         else:
             print(f"Vértice '{u}' não existe no grafo.")
             return 0
-    
+    #Ponto H: Função que define qual o grau daquele vertice totalizando a soma dos graus de saida e entrada
     def grau(self, u):
         if u not in self.adjacente_list:
             print(f"Vértice '{u}' não existe no grafo.")
@@ -112,21 +135,23 @@ class Grafo:
         total_grau = grau_entrada + grau_saida
         print(f"Grau total do vértice '{u}': {total_grau}")
         return total_grau
-    
+        
+    #Ponto I: Função gera os valores para arestas ponderadas
     def get_peso(self, u, v):
         if self.tem_aresta(u, v):
             for destino, peso in self.adjacente_list[u]:
                 if destino == v:
                     print(f"Peso da aresta de '{u}' para '{v}': {peso}")
                     return peso
-                
+
+    #Ponto J: Função que imprime a lista de adjacencias
     def imprime_lista_adjacencias(self):
         print("Lista de adjacências do grafo:")
         for vertice, arestas in self.adjacente_list.items():
             arestas_str = " -> ".join(f"('{destino}', {peso})" for destino, peso in arestas) + " ->" if arestas else ""
             print(f"{vertice}: {arestas_str}")
 
-
+    #Função Dijkstra
     def Dijkstra(self, source_node, destination_node):
         distances = {}
         for vertex in self.adjacente_list:
@@ -169,6 +194,7 @@ class Grafo:
     
 grafo = Grafo()
 
+##Chamadas das funções implemntadas
 grafo.adiciona_vertice("A")
 grafo.adiciona_vertice("B")
 grafo.adiciona_vertice("C")
@@ -239,7 +265,7 @@ grafo_nao_direcionado.adiciona_vertice("C")
 grafo_nao_direcionado.adiciona_aresta("A", "B")
 grafo_nao_direcionado.adiciona_aresta("B", "C")
 
-# Utilização das funções
+# Utilização das duas funções
 print("Max arestas em grafo direcionado: ", grafo_direcionado.get_max_arestas())
 print("Adjacências de 'B' em grafo direcionado: ", grafo_direcionado.retorna_adjacentes("B"))
 
